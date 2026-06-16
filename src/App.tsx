@@ -1,25 +1,12 @@
 import { useState } from "react";
+import HomeScreen from "./HomeScreen";
 
 export default function App() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [mode, setMode] = useState("xtream");
 
   if (loggedIn) {
-    return (
-      <div
-        style={{
-          minHeight: "100vh",
-          background: "#05010d",
-          color: "white",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          fontFamily: "Arial, sans-serif"
-        }}
-      >
-        <h1>HOME SCREEN COMING NEXT</h1>
-      </div>
-    );
+    return <HomeScreen />;
   }
 
   return (
