@@ -1,31 +1,40 @@
 export default function ChannelPlayer({
-  channel = "ESPN HD",
-  title = "NBA Basketball",
-  description = "Live coverage of today's featured event."
+  channel = "Channel",
+  streamUrl = "",
+  title = "",
+  description = ""
 }: {
   channel?: string;
+  streamUrl?: string;
   title?: string;
   description?: string;
 }) {
   return (
     <div style={{ color: "white" }}>
-      <h1>{channel}</h1>
-
-      <div
+      <h1
         style={{
-          height: "500px",
-          background: "#000",
-          borderRadius: "20px",
-          marginTop: "20px",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          fontSize: "32px",
-          fontWeight: "bold"
+          fontSize: "24px",
+          lineHeight: "1.2",
+          wordBreak: "break-word",
+          overflowWrap: "anywhere",
+          maxWidth: "100%"
         }}
       >
-        ▶ LIVE TV PLAYER
-      </div>
+        {channel}
+      </h1>
+
+      <video
+        controls
+        autoPlay
+        style={{
+          width: "100%",
+          maxHeight: "650px",
+          background: "#000",
+          borderRadius: "20px",
+          marginTop: "20px"
+        }}
+        src={streamUrl}
+      />
 
       <div
         style={{
@@ -36,10 +45,10 @@ export default function ChannelPlayer({
         }}
       >
         <h2>Now Playing</h2>
-        <p>{title}</p>
+        <p>{title || channel}</p>
 
         <h2>Description</h2>
-        <p>{description}</p>
+        <p>{description || "Live IPTV Stream"}</p>
       </div>
     </div>
   );

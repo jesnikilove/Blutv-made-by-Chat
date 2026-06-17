@@ -1,7 +1,25 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import {
+  getProviders,
+  setActiveProvider
+} from "./store/providerStore";
+import {
+  getBufferLevel,
+  setBufferLevel,
+  getReconnect,
+  setReconnect
+} from "./store/settingsStore";
 
 export default function Settings() {
-  const [theme, setTheme] = useState("BluTV Dark");
+  const [providers, setProviders] = useState<any[]>([]);
+  const [buffer, setBuffer] = useState("medium");
+  const [reconnect, setReconnectState] = useState(false);
+
+  useEffect(() => {
+    setProviders(getProviders());
+    setBuffer(getBufferLevel());
+    setReconnectState(getReconnect());
+  }, []);
 
   return (
     <div style={{ color: "white" }}>
@@ -9,9 +27,9 @@ export default function Settings() {
 
       <div
         style={{
-          marginTop: 20,
           display: "grid",
-          gap: 15
+          gap: 15,
+          marginTop: 20
         }}
       >
         <div
@@ -21,48 +39,89 @@ export default function Settings() {
             padding: 20
           }}
         >
-          👤 Profile
-          <div style={{ color: "#aaa", marginTop: 5 }}>
-            Jessica
-          </div>
-        </div>
+          <h2>📺 Providers</h2>
 
-        <div
-          style={{
-            background: "#111827",
-            borderRadius: 20,
-            padding: 20
-          }}
-        >
-          🎨 Theme
+          {providers.length === 0 && (
+            <div>No Providers Added Yet</div>
+          )}
 
-          <div style={{ marginTop: 10 }}>
-            <button
-              onClick={() => setTheme("BluTV Dark")}
+          {providers.map((provider) => (
+            <div
+              key={provider.id}
               style={{
-                marginRight: 10,
-                padding: "10px 16px",
-                borderRadius: 10,
-                border: "none"
+                marginTop: 10,
+                padding: 12,
+                borderRadius: 12,
+                background: provider.active
+                  ? "#1e3a8a"
+                  : "#1f2937",
+                cursor: "pointer"
+              }}
+              onClick={() => {
+                setActiveProvider(provider.id);
+                setProviders(getProviders());
               }}
             >
-              Dark
+              {provider.name}
+              {provider.active ? " ✅ ACTIVE" : ""}
+            </div>
+          ))}
+
+          <div
+            style={{
+              display: "flex",
+              gap: 10,
+              marginTop: 15
+            }}
+          >
+            <button
+              onClick={() =>
+                alert("Xtream Provider Screen Coming Next")
+              }
+            >
+              + Xtream
             </button>
 
             <button
-              onClick={() => setTheme("BluTV Purple")}
-              style={{
-                padding: "10px 16px",
-                borderRadius: 10,
-                border: "none"
-              }}
+              onClick={() =>
+                alert("M3U Provider Screen Coming Next")
+              }
             >
-              Purple
+              + M3U
             </button>
           </div>
+        </div>
 
-          <div style={{ marginTop: 10 }}>
-            Current Theme: {theme}
+        <div
+          style={{
+            background: "#111827",
+            borderRadius: 20,
+            padding: 20
+          }}
+        >
+          <h2>🚀 Buffer Settings</h2>
+
+          <div
+            style={{
+              display: "flex",
+              gap: 10
+            }}
+          >
+            {["small","medium","large"].map(level => (
+              <button
+                key={level}
+                onClick={() => {
+                  setBuffer(level);
+                  setBufferLevel(level);
+                }}
+              >
+                {level.toUpperCase()}
+              </button>
+            ))}
+          </div>
+
+          <div style={{ marginTop: 12 }}>
+            Current: {buffer}
           </div>
         </div>
 
@@ -73,7 +132,17 @@ export default function Settings() {
             padding: 20
           }}
         >
-          ⭐ Favorites Manager
+          <h2>🔄 Auto Reconnect</h2>
+
+          <button
+            onClick={() => {
+              const next = !reconnect;
+              setReconnectState(next);
+              setReconnect(next);
+            }}
+          >
+            {reconnect ? "ON" : "OFF"}
+          </button>
         </div>
 
         <div
@@ -83,31 +152,23 @@ export default function Settings() {
             padding: 20
           }}
         >
-          🔒 Parental Controls
+          <h2>ℹ About</h2>
+
+          <div>StreamLine BluTV</div>
+          <div>Version 1.0</div>
         </div>
 
         <div
           style={{
-            background: "#111827",
-            borderRadius: 20,
-            padding: 20
-          }}
-        >
-          ℹ About BluTV
-
-          <div style={{ marginTop: 10, color: "#aaa" }}>
-            Version 1.0
-          </div>
-        </div>
-
-        <div
-          style={{
-            background: "#111827",
+            background: "#7f1d1d",
             borderRadius: 20,
             padding: 20,
             cursor: "pointer"
           }}
-          onClick={() => alert("Logout Coming Soon")}
+          onClick={() => {
+            localStorage.removeItem("blutv_session");
+            location.reload();
+          }}
         >
           🚪 Logout
         </div>

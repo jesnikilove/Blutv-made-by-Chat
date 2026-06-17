@@ -1,25 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import HomeScreen from "./HomeScreen";
-import { getActiveProvider } from "./store/providerStore";
-import { login } from "./services/xtream";
-import { addProvider } from "./store/providerStore";
 
 export default function App() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [mode, setMode] = useState("xtream");
-
-const [server,setServer] = useState("");
-const [username,setUsername] = useState("");
-const [password,setPassword] = useState("");
-const [loading,setLoading] = useState(false);
-
-useEffect(() => {
-  const provider = getActiveProvider();
-
-  if (provider && provider.autoLogin) {
-    setLoggedIn(true);
-  }
-}, []);
 
   if (loggedIn) {
     return <HomeScreen />;
@@ -109,9 +93,13 @@ useEffect(() => {
 
         {mode === "xtream" ? (
           <>
-            <input placeholder="Server URL" value={server} onChange={e => setServer(e.target.value)} style={inputStyle} />
-            <input placeholder="Username" value={username} onChange={e => setUsername(e.target.value)} style={inputStyle} />
-            <input placeholder="Password" type="password" value={password} onChange={e => setPassword(e.target.value)} style={inputStyle} />
+            <input placeholder="Server URL" style={inputStyle} />
+            <input placeholder="Username" style={inputStyle} />
+            <input
+              placeholder="Password"
+              type="password"
+              style={inputStyle}
+            />
           </>
         ) : (
           <>
@@ -142,28 +130,7 @@ useEffect(() => {
         </div>
 
         <button
-          onClick={async () => {
-try {
-setLoading(true);
-await login(server,username,password);
-addProvider({
-id: Date.now().toString(),
-name: username,
-type: "xtream",
-server,
-username,
-password,
-active: true,
-rememberProvider: true,
-autoLogin: true
-});
-setLoggedIn(true);
-} catch {
-alert("Xtream Login Failed");
-} finally {
-setLoading(false);
-}
-}}
+          onClick={() => setLoggedIn(true)}
           style={{
             width: "100%",
             marginTop: "15px",
@@ -178,7 +145,7 @@ setLoading(false);
             cursor: "pointer"
           }}
         >
-          {loading ? "CONNECTING..." : "CONNECT"}
+          CONNECT
         </button>
 
         <div style={{ marginTop: "30px" }}>
