@@ -38,11 +38,9 @@ export default function Movies() {
     loadMovies();
   }, []);
 
-
   if (loading) {
-
-return (
-    <div style={{ color: "white" }}>
+    return (
+      <div style={{ color: "white" }}>
         Loading Movies...
       </div>
     );
@@ -101,56 +99,145 @@ return (
             addFavorite(selectedMovie.name, "Movie");
             alert("Added To Favorite Movies");
           }}
-          onSelectMovie={setSelectedMovie}
         />
       </div>
     );
   }
 
+  const featured = movies[0];
+
+  const genres = Array.from(
+    new Set(
+      movies.flatMap(movie =>
+        (movie.genre || "")
+          .split(",")
+          .map((g: string) => g.trim())
+          .filter(Boolean)
+      )
+    )
+  );
+
   return (
     <div style={{ color: "white" }}>
-      <h1>🎬 Movies</h1>
+      <h1 style={{ marginBottom: 20 }}>
+        🎬 Movies
+      </h1>
 
-
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns:
-            "repeat(auto-fill,minmax(220px,1fr))",
-          gap: 20,
-          marginTop: 20
-        }}
-      >
-        {movies.map(movie => (
-          <div
-            key={movie.stream_id}
-            onClick={() => setSelectedMovie(movie)}
+      {featured && (
+        <div
+          onClick={() => setSelectedMovie(featured)}
+          style={{
+            height: 350,
+            borderRadius: 24,
+            overflow: "hidden",
+            marginBottom: 40,
+            cursor: "pointer",
+            position: "relative"
+          }}
+        >
+          <img
+            src={featured.stream_icon}
+            alt={featured.name}
             style={{
-              cursor: "pointer"
+              width: "100%",
+              height: "100%",
+              objectFit: "cover"
+            }}
+          />
+
+          <div
+            style={{
+              position: "absolute",
+              bottom: 0,
+              left: 0,
+              right: 0,
+              padding: 30,
+              background:
+                "linear-gradient(transparent,rgba(0,0,0,.9))"
             }}
           >
-            <img
-              src={movie.stream_icon}
-              alt={movie.name}
+            <h2>{featured.name}</h2>
+            <p>{featured.genre}</p>
+          </div>
+        </div>
+      )}
+
+      {genres.map((genre) => {
+        const genreMovies = movies.filter(movie =>
+          (movie.genre || "").includes(genre)
+        );
+
+        if (!genreMovies.length) return null;
+
+        return (
+          <div
+            key={genre}
+            style={{ marginBottom: 35 }}
+          >
+            <h2
               style={{
-                width: "100%",
-                height: 320,
-                objectFit: "cover",
-                borderRadius: 18
+                marginBottom: 15
               }}
-            />
+            >
+              {genre}
+            </h2>
 
             <div
               style={{
-                marginTop: 10,
-                fontWeight: "bold"
+                display: "flex",
+                gap: 12,
+                overflowX: "auto",
+                paddingBottom: 10
               }}
             >
-              {movie.name}
+              {genreMovies.map(movie => (
+                <div
+                  key={`${movie.stream_id}-${movie.name}`}
+                  onClick={() =>
+                    setSelectedMovie(movie)
+                  }
+                  style={{
+                    minWidth: 150,
+                    cursor: "pointer"
+                  }}
+                >
+                  {movie.stream_icon ? (
+                    <img
+                      src={movie.stream_icon}
+                      alt={movie.name}
+                      style={{
+                        width: 150,
+                        height: 225,
+                        objectFit: "cover",
+                        borderRadius: 12
+                      }}
+                    />
+                  ) : (
+                    <div
+                      style={{
+                        width: 150,
+                        height: 225,
+                        borderRadius: 12,
+                        background: "#1f2937"
+                      }}
+                    />
+                  )}
+
+                  <div
+                    style={{
+                      marginTop: 8,
+                      fontSize: 13,
+                      fontWeight: "bold"
+                    }}
+                  >
+                    {movie.name}
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
-        ))}
-      </div>
+        );
+      })}
     </div>
   );
 }

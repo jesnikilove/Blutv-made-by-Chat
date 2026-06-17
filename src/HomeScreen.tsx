@@ -111,18 +111,10 @@ export default function HomeScreen() {
   ];
 
   return (
-    <div
-      style={{
-        background: "#05010d",
-        color: "white",
-        minHeight: "100vh",
-        display: "flex",
-        fontFamily: "Arial, sans-serif"
-      }}
-    >
-      <div
-        style={{
-          width: 260,
+    page === "EPG"
+      ? <div style={{background:"#05010d",color:"white",height:"100vh",overflow:"hidden"}}>{renderContent()}</div>
+      : <div style={{background:"#05010d",color:"white",minHeight:"100vh",display:"flex",fontFamily:"Arial, sans-serif"}}>
+      <div style={{width:260,
           background: "#0f0f1c",
           padding: 25,
           borderRight: "1px solid #222"

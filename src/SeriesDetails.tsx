@@ -1,94 +1,158 @@
-import { useState } from "react";
-import Episodes from "./Episodes";
+import { useEffect, useState } from "react";
+import { getActiveProvider } from "./store/providerStore";
+import { getSeriesInfo } from "./services/xtream";
 
 export default function SeriesDetails({
   show,
   onFavorite
 }: any) {
-  const [showEpisodes, setShowEpisodes] = useState(false);
+  const [info, setInfo] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [selectedSeason, setSelectedSeason] = useState("");
 
-  if (showEpisodes) {
+  useEffect(() => {
+    async function loadSeriesInfo() {
+      try {
+        const provider = getActiveProvider();
+
+        if (!provider || !show?.series_id) return;
+
+        const data = await getSeriesInfo(
+          provider.server || "",
+          provider.username || "",
+          provider.password || "",
+          show.series_id
+        );
+
+        console.log("SERIES_INFO",data);
+        setInfo(data);
+
+        const firstSeason =
+          Object.keys(data?.episodes || {})[0];
+
+        if (firstSeason) {
+          setSelectedSeason(firstSeason);
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadSeriesInfo();
+  }, [show]);
+
+  if (loading) {
     return (
-      <div>
-        <button
-          onClick={() => setShowEpisodes(false)}
-          style={{
-            marginBottom: 20,
-            padding: "12px 20px",
-            borderRadius: 12,
-            border: "none"
-          }}
-        >
-          ← Back to Seasons
-        </button>
-
-        <Episodes />
+      <div style={{ color: "white" }}>
+        Loading Series...
       </div>
     );
   }
 
+  const seasons = info?.episodes
+    ? Object.keys(info.episodes)
+    : [];
+
+  const selectedSeasonEpisodes =
+    info?.episodes?.[selectedSeason] || [];
+
   return (
     <div style={{ color: "white" }}>
-      <h1>{show}</h1>
-
       <div
         style={{
-          display: "flex",
-          gap: 15,
-          marginBottom: 20
+          display: "grid",
+          gridTemplateColumns: "260px 1fr",
+          gap: 30,
+          background: "#111827",
+          borderRadius: 24,
+          padding: 30
         }}
       >
-        <button
-          onClick={() => setShowEpisodes(true)}
+        <img
+          src={show?.cover || show?.stream_icon}
+          alt={show?.name}
           style={{
-            padding: "14px 28px",
-            borderRadius: 12,
-            border: "none",
-            cursor: "pointer"
+            width: "100%",
+            borderRadius: 18
           }}
-        >
-          ▶ Resume Watching
-        </button>
+        />
 
-        <button
-          onClick={onFavorite}
-          style={{
-            padding: "14px 28px",
-            borderRadius: 12,
-            border: "none",
-            cursor: "pointer"
-          }}
-        >
-          ⭐ Favorite Series
-        </button>
+        <div>
+          <h1>{show?.name}</h1>
+
+          <div
+            style={{
+              color: "#aaa",
+              marginBottom: 15
+            }}
+          >
+            {show?.genre}
+          </div>
+
+          <button onClick={onFavorite}>
+            ⭐ Favorite Series
+          </button>
+
+          <p
+            style={{
+              marginTop: 20,
+              lineHeight: 1.8
+            }}
+          >
+            {info?.info?.plot || show?.plot}
+          </p>
+        </div>
       </div>
 
-      <div
-        style={{
-          background: "#111827",
-          borderRadius: 20,
-          padding: 20
-        }}
-      >
-        <h2>Seasons</h2>
+      <div style={{ marginTop: 30 }}>
+        <h2>Episodes</h2>
 
-        <div
-          onClick={() => setShowEpisodes(true)}
+        <select
+          value={selectedSeason}
+          onChange={(e) =>
+            setSelectedSeason(e.target.value)
+          }
           style={{
-            padding: 15,
-            marginTop: 10,
-            borderRadius: 12,
-            background: "#1f2937",
-            cursor: "pointer"
+            padding: 12,
+            borderRadius: 10,
+            marginBottom: 20,
+            minWidth: 220
           }}
         >
-          Season 1
-        </div>
+          {seasons.map((season) => (
+            <option
+              key={season}
+              value={season}
+            >
+              Season {season}
+            </option>
+          ))}
+        </select>
 
-        <div style={{ padding: 15 }}>Season 2</div>
-        <div style={{ padding: 15 }}>Season 3</div>
-        <div style={{ padding: 15 }}>Season 4</div>
-        <div style={{ padding: 15 }}>Season 5</div>
+        <div
+          style={{
+            background: "#111827",
+            borderRadius: 16,
+            maxHeight: "600px",
+            overflowY: "auto"
+          }}
+        >
+          {selectedSeasonEpisodes.map(
+            (ep: any) => (
+              <div
+                key={ep.id}
+                style={{
+                  padding: 15,
+                  borderBottom: "1px solid #222"
+                }}
+              >
+                {ep.title}
+              </div>
+            )
+          )}
+        </div>
       </div>
     </div>
   );

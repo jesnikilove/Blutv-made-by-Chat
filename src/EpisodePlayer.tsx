@@ -1,39 +1,73 @@
-export default function EpisodePlayer() {
+import { useEffect, useRef } from "react";
+
+export default function EpisodePlayer({
+  title = "",
+  streamUrl = ""
+}: any) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+
+    if (!video) return;
+
+    video.play().catch(() => {});
+
+    const fullscreen = async () => {
+      try {
+        await video.requestFullscreen();
+      } catch {}
+    };
+
+    video.addEventListener(
+      "loadedmetadata",
+      fullscreen
+    );
+
+    return () =>
+      video.removeEventListener(
+        "loadedmetadata",
+        fullscreen
+      );
+  }, []);
+
   return (
     <div style={{ color: "white" }}>
-      <h1>Breaking Bad - S01E01</h1>
-
-      <div
+      <h1
         style={{
-          height: "500px",
-          marginTop: "20px",
-          borderRadius: "20px",
-          background: "#000",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          fontSize: "32px",
-          fontWeight: "bold"
+          fontSize: "clamp(28px,4vw,52px)",
+          lineHeight: 1.1,
+          marginBottom: 20,
+          wordBreak: "break-word",
+          overflowWrap: "anywhere"
         }}
       >
-        ▶ VIDEO PLAYER
-      </div>
+        {title}
+      </h1>
 
-      <div
+      <video
+        ref={videoRef}
+        controls
+        autoPlay
+        playsInline
+        src={streamUrl}
         style={{
-          marginTop: "20px",
-          background: "#111827",
-          padding: "20px",
+          width: "100%",
+          maxHeight: "80vh",
+          background: "#000",
           borderRadius: "20px"
         }}
-      >
-        <h2>Episode Information</h2>
+      />
 
-        <p>
-          Walter White, a chemistry teacher diagnosed
-          with cancer, begins making life-changing
-          decisions.
-        </p>
+      <div
+        style={{
+          marginTop: 20,
+          background: "#111827",
+          borderRadius: 16,
+          padding: 20
+        }}
+      >
+        Now Playing: {title}
       </div>
     </div>
   );

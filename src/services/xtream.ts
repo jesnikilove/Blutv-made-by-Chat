@@ -91,3 +91,83 @@ export async function getVodStreams(
 
   return await res.json();
 }
+
+export async function getSeries(
+  server: string,
+  username: string,
+  password: string
+) {
+  const base = normalizeServer(server);
+
+  const res = await fetch(
+    `${base}/player_api.php?username=${username}&password=${password}&action=get_series`
+  );
+
+  return await res.json();
+}
+
+export async function getSeriesInfo(
+  server: string,
+  username: string,
+  password: string,
+  seriesId: string | number
+) {
+  const base = normalizeServer(server);
+
+  const res = await fetch(
+    `${base}/player_api.php?username=${username}&password=${password}&action=get_series_info&series_id=${seriesId}`
+  );
+
+  return await res.json();
+}
+
+export function buildEpisodeUrl(
+  server: string,
+  username: string,
+  password: string,
+  episodeId: string | number,
+  extension: string
+) {
+  const base = normalizeServer(server);
+
+  return `${base}/series/${username}/${password}/${episodeId}.${extension}`;
+}
+
+
+export async function getShortEpg(
+  server: string,
+  username: string,
+  password: string,
+  streamId: string | number
+) {
+  const base = normalizeServer(server);
+
+  const res = await fetch(
+    `${base}/player_api.php?username=${username}&password=${password}&action=get_short_epg&stream_id=${streamId}&limit=50`
+  );
+
+  return await res.json();
+}
+
+
+import { XMLParser } from "fast-xml-parser";
+
+export async function getXmltvGuide(
+  server: string,
+  username: string,
+  password: string
+) {
+  const base = normalizeServer(server);
+
+  const xml = await fetch(
+    `${base}/xmltv.php?username=${username}&password=${password}`
+  ).then(r => r.text());
+
+  const parser = new XMLParser({
+    ignoreAttributes: false,
+    attributeNamePrefix: ""
+  });
+
+  return parser.parse(xml);
+
+}
