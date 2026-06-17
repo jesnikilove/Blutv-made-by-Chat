@@ -203,7 +203,7 @@ setGuideData(guideMap);
             style={{
               display: "grid",
               gridTemplateColumns:
-                "280px repeat(3,1fr)",
+                "280px repeat(12,minmax(240px,240px))",
               gap: 12,
               position: "sticky",
               top: 0,
@@ -247,7 +247,7 @@ setGuideData(guideMap);
               style={{
                 display: "grid",
                 gridTemplateColumns:
-                  "280px repeat(3,1fr)",
+                  "280px repeat(12,minmax(240px,240px))",
                 gap: 12,
                 marginTop: 8
               }}
