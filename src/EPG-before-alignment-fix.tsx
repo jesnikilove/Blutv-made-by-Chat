@@ -134,7 +134,7 @@ console.log("FIRST_ITEM", JSON.stringify(guideData[channels[0]?.epg_channel_id]?
   const timeline =
     channels.length && guideData[channels[0].epg_channel_id]
       ? (guideData[channels[0].epg_channel_id] || [])
-          .slice(0, 8)
+          .slice(0, 12)
           .map((item: any) =>
             new Date(Number(item.start_timestamp) * 1000).toLocaleTimeString([], { hour: "numeric", minute: "2-digit", hour12: true })
           )
@@ -191,7 +191,7 @@ console.log("FIRST_ITEM", JSON.stringify(guideData[channels[0]?.epg_channel_id]?
             style={{
               display: "grid",
               gridTemplateColumns:
-                "280px repeat(4,minmax(320px,1fr))",
+                "280px repeat(8,minmax(220px,1fr))",
               gap: 12,
               position: "sticky",
               top: 0,
@@ -235,7 +235,7 @@ console.log("FIRST_ITEM", JSON.stringify(guideData[channels[0]?.epg_channel_id]?
               style={{
                 display: "grid",
                 gridTemplateColumns:
-                  "280px repeat(4,minmax(320px,1fr))",
+                  "280px repeat(8,minmax(220px,1fr))",
                 gap: 12,
                 marginTop: 8
               }}
@@ -278,7 +278,7 @@ console.log("FIRST_ITEM", JSON.stringify(guideData[channels[0]?.epg_channel_id]?
                 </div>
               </div>
 
-              {((guideData[channel.epg_channel_id] || []).length === 0) ? Array.from({length:8}).map((_,idx)=>(<div key={idx} style={{background:"#111827",borderRadius:12,padding:12,minHeight:140,display:"flex",alignItems:"center",justifyContent:"center",color:"#6b7280",fontWeight:"bold"}}>No Guide Data</div>)) : (guideData[channel.epg_channel_id] || []).slice(0,4).map((item: any, idx: number) => (
+              {((guideData[channel.epg_channel_id] || []).length === 0) ? Array.from({length:8}).map((_,idx)=>(<div key={idx} style={{background:"#111827",borderRadius:12,padding:12,minHeight:140,display:"flex",alignItems:"center",justifyContent:"center",color:"#6b7280",fontWeight:"bold"}}>No Guide Data</div>)) : (guideData[channel.epg_channel_id] || []).slice(0,8).map((item: any, idx: number) => (
                   <div
                     key={idx}
                     style={{
