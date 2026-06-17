@@ -16,6 +16,10 @@ export default function EPG() {
   const [showPlayer] = useState(false);
   const [showDetails] = useState(false);
   const [selectedProgram,setSelectedProgram] = useState<any>(null);
+  const [visibleStart, setVisibleStart] = useState(0);
+
+  console.log("VISIBLE START", visibleStart);
+
 
   useEffect(() => {
     async function load() {
@@ -99,6 +103,8 @@ const usChannels = streamData
     a.name.localeCompare(b.name)
   );
 
+console.log("CHANNEL COUNT", usChannels.length);
+
 setChannels(usChannels);
 
 if (usChannels.length) {
@@ -129,12 +135,14 @@ setGuideData(guideMap);
   const currentDescription =
     currentProgram?.description || "";
 
+  const startHour = new Date().getHours();
+
   const timeline = Array.from({length:24}, (_,i)=>{
-  const d = new Date();
-  d.setMinutes(0,0,0);
-  d.setHours(13 + i);
-  return d.toLocaleTimeString([], { hour:"numeric", minute:"2-digit", hour12:true });
-});
+    const d = new Date();
+    d.setMinutes(0,0,0);
+    d.setHours(startHour + i);
+    return d.toLocaleTimeString([], { hour:"numeric", minute:"2-digit", hour12:true });
+  });
 
   if (showPlayer && selectedChannel) {
     return (
@@ -203,6 +211,8 @@ setGuideData(guideMap);
           </div>
 
           <div
+            onScroll={(e) => setVisibleStart(Math.max(0, Math.floor(e.currentTarget.scrollTop / 160)))}
+
             style={{
               overflowX: "scroll",
               overflowY: "auto",
@@ -258,7 +268,7 @@ setGuideData(guideMap);
             ))}
           </div>
 
-          {channels.map(channel => (
+          {channels.slice(visibleStart, visibleStart + 20).map(channel => (
             <div
               key={channel.stream_id}
               style={{
