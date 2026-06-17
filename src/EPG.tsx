@@ -65,6 +65,10 @@ programmes.forEach((p: any) => {
     guideMap[channelId] = [];
   }
 
+  const now = Math.floor(Date.now() / 1000);
+  const startTs = Number(p.start_timestamp || 0);
+  if (!startTs || startTs < now || startTs > now + 86400) return;
+
 
   guideMap[channelId].push({
     id: p.start_timestamp || `-`,
@@ -101,6 +105,7 @@ if (usChannels.length) {
   setSelectedChannel(usChannels[0]);
 }
 
+
 setGuideData(guideMap);
       } finally {
         setLoading(false);
@@ -124,7 +129,7 @@ setGuideData(guideMap);
   const currentDescription =
     currentProgram?.description || "";
 
-  const timeline = Array.from({length:12}, (_,i)=>{
+  const timeline = Array.from({length:24}, (_,i)=>{
   const d = new Date();
   d.setMinutes(0,0,0);
   d.setHours(13 + i);
@@ -175,7 +180,7 @@ setGuideData(guideMap);
           flexDirection: "column"
         }}
       >
-        <div>
+        <div style={{height:"100%",display:"flex",flexDirection:"column"}}>
           <div style={{display:"grid",gridTemplateColumns:"1.4fr 1fr",gap:12,marginBottom:12}}>
             <div style={{background:"#111827",borderRadius:12,minHeight:260,display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,fontWeight:"bold"}}>
               Preview Screen
@@ -199,17 +204,20 @@ setGuideData(guideMap);
 
           <div
             style={{
-              overflowX: "auto",
+              overflowX: "scroll",
               overflowY: "auto",
+              height: "calc(100vh - 320px)",
+              width: "100%",
               flex: 1
             }}
           >
+            <div style={{width:"6040px"}}>
 
           <div
             style={{
               display: "grid",
               gridTemplateColumns:
-                "280px repeat(12,minmax(240px,240px))",
+                "280px repeat(50,minmax(240px,240px))",
               gap: 12,
               position: "sticky",
               top: 0,
@@ -225,7 +233,10 @@ setGuideData(guideMap);
                 borderRadius: 12,
                 padding: 15,
                 fontWeight: "bold",
-                textAlign: "center"
+                textAlign: "center",
+                position: "sticky",
+                left: 0,
+                zIndex: 200
               }}
             >
               CHANNELS
@@ -253,7 +264,7 @@ setGuideData(guideMap);
               style={{
                 display: "grid",
                 gridTemplateColumns:
-                  "280px repeat(12,minmax(240px,240px))",
+                  "280px repeat(50,minmax(240px,240px))",
                 gap: 12,
                 marginTop: 8
               }}
@@ -267,6 +278,9 @@ setGuideData(guideMap);
                   padding: 12,
                   borderRadius: 12,
                   cursor: "pointer",
+                  position: "sticky",
+                  left: 0,
+                  zIndex: 100,
                   background:
                     selectedChannel?.stream_id ===
                     channel.stream_id
@@ -296,7 +310,7 @@ setGuideData(guideMap);
                 </div>
               </div>
 
-              {((guideData[channel.epg_channel_id] || []).length === 0) ? Array.from({length:8}).map((_,idx)=>(<div key={idx} style={{background:"#111827",borderRadius:12,padding:12,minHeight:140,display:"flex",alignItems:"center",justifyContent:"center",color:"#6b7280",fontWeight:"bold"}}>No Guide Data</div>)) : (guideData[channel.epg_channel_id] || []).slice(0,12).map((item: any, idx: number) => (
+              {((guideData[channel.epg_channel_id] || []).length === 0) ? Array.from({length:8}).map((_,idx)=>(<div key={idx} style={{background:"#111827",borderRadius:12,padding:12,minHeight:140,display:"flex",alignItems:"center",justifyContent:"center",color:"#6b7280",fontWeight:"bold"}}>No Guide Data</div>)) : (guideData[channel.epg_channel_id] || []).slice(0,48).map((item: any, idx: number) => (
                   <div
                     key={idx}
                     onClick={() => { setSelectedProgram(item); }}
@@ -322,6 +336,7 @@ setGuideData(guideMap);
                 ))}
             </div>
           ))}
+          </div>
           </div>
         </div>
       </div>
