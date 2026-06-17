@@ -15,6 +15,7 @@ export default function EPG() {
   const [loading, setLoading] = useState(true);
   const [showPlayer] = useState(false);
   const [showDetails] = useState(false);
+  const [selectedProgram,setSelectedProgram] = useState<any>(null);
 
   useEffect(() => {
     async function load() {
@@ -64,9 +65,6 @@ programmes.forEach((p: any) => {
     guideMap[channelId] = [];
   }
 
-console.log("XMLTV_SAMPLE", p.start);
-
-console.log("PROGRAM_DEBUG", JSON.stringify(p));
 
   guideMap[channelId].push({
     id: p.start_timestamp || `-`,
@@ -119,7 +117,6 @@ setGuideData(guideMap);
 
   const currentProgram = currentPrograms[0];
 
-console.log("CURRENT_PROGRAM", currentProgram);
 
   const currentTitle =
     JSON.stringify(currentProgram,null,2);
@@ -127,18 +124,12 @@ console.log("CURRENT_PROGRAM", currentProgram);
   const currentDescription =
     currentProgram?.description || "";
 
-  console.log("FIRST_ITEM", guideData[channels[0]?.epg_channel_id]?.[0]);
-
-console.log("FIRST_ITEM", JSON.stringify(guideData[channels[0]?.epg_channel_id]?.[0], null, 2));
-
-  const timeline =
-    channels.length && guideData[channels[0].epg_channel_id]
-      ? (guideData[channels[0].epg_channel_id] || [])
-          .slice(0, 8)
-          .map((item: any) =>
-            new Date(Number(item.start_timestamp) * 1000).toLocaleTimeString([], { hour: "numeric", minute: "2-digit", hour12: true })
-          )
-      : [];
+  const timeline = Array.from({length:12}, (_,i)=>{
+  const d = new Date();
+  d.setMinutes(0,0,0);
+  d.setHours(13 + i);
+  return d.toLocaleTimeString([], { hour:"numeric", minute:"2-digit", hour12:true });
+});
 
   if (showPlayer && selectedChannel) {
     return (
@@ -173,25 +164,46 @@ console.log("FIRST_ITEM", JSON.stringify(guideData[channels[0]?.epg_channel_id]?
   }
 
   return (
-    <div style={{ color: "white", height: "100vh" }}>
+    <div style={{ color: "white", height: "100vh",flex:1, display:"flex" }}>
       
 
       <div
         style={{
           overflow: "auto",
-          height: "100vh"
+          height: "100vh",
+          flex: 1
         }}
       >
         <div
           style={{
-            minWidth: "2200px"
+            width: "100%"
           }}
         >
+          <div style={{display:"grid",gridTemplateColumns:"1.4fr 1fr",gap:12,marginBottom:12}}>
+            <div style={{background:"#111827",borderRadius:12,minHeight:260,display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,fontWeight:"bold"}}>
+              Preview Screen
+            </div>
+            <div style={{background:"#111827",borderRadius:12,padding:20}}>
+              {selectedProgram ? (
+                <>
+                  <h2>{selectedProgram.title}</h2>
+                  <div style={{color:"#60a5fa",marginBottom:12}}>
+                    {new Date(Number(selectedProgram.start_timestamp) * 1000).toLocaleTimeString([], { hour:"numeric", minute:"2-digit", hour12:true })}
+                    {" - "}
+                    {new Date(Number(selectedProgram.stop_timestamp) * 1000).toLocaleTimeString([], { hour:"numeric", minute:"2-digit", hour12:true })}
+                  </div>
+                  <div>{selectedProgram.description || "No description available"}</div>
+                </>
+              ) : (
+                <div>Select a program</div>
+              )}
+            </div>
+          </div>
           <div
             style={{
               display: "grid",
               gridTemplateColumns:
-                "280px repeat(4,minmax(320px,1fr))",
+                "280px repeat(3,1fr)",
               gap: 12,
               position: "sticky",
               top: 0,
@@ -235,7 +247,7 @@ console.log("FIRST_ITEM", JSON.stringify(guideData[channels[0]?.epg_channel_id]?
               style={{
                 display: "grid",
                 gridTemplateColumns:
-                  "280px repeat(4,minmax(320px,1fr))",
+                  "280px repeat(3,1fr)",
                 gap: 12,
                 marginTop: 8
               }}
@@ -281,6 +293,7 @@ console.log("FIRST_ITEM", JSON.stringify(guideData[channels[0]?.epg_channel_id]?
               {((guideData[channel.epg_channel_id] || []).length === 0) ? Array.from({length:8}).map((_,idx)=>(<div key={idx} style={{background:"#111827",borderRadius:12,padding:12,minHeight:140,display:"flex",alignItems:"center",justifyContent:"center",color:"#6b7280",fontWeight:"bold"}}>No Guide Data</div>)) : (guideData[channel.epg_channel_id] || []).slice(0,4).map((item: any, idx: number) => (
                   <div
                     key={idx}
+                    onClick={() => { setSelectedProgram(item); }}
                     style={{
                       background: "#111827",
                       borderRadius: 12,
