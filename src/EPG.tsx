@@ -169,16 +169,13 @@ setGuideData(guideMap);
 
       <div
         style={{
-          overflow: "auto",
           height: "100vh",
-          flex: 1
+          flex: 1,
+          display: "flex",
+          flexDirection: "column"
         }}
       >
-        <div
-          style={{
-            width: "100%"
-          }}
-        >
+        <div>
           <div style={{display:"grid",gridTemplateColumns:"1.4fr 1fr",gap:12,marginBottom:12}}>
             <div style={{background:"#111827",borderRadius:12,minHeight:260,display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,fontWeight:"bold"}}>
               Preview Screen
@@ -199,6 +196,15 @@ setGuideData(guideMap);
               )}
             </div>
           </div>
+
+          <div
+            style={{
+              overflowX: "auto",
+              overflowY: "auto",
+              flex: 1
+            }}
+          >
+
           <div
             style={{
               display: "grid",
@@ -290,7 +296,7 @@ setGuideData(guideMap);
                 </div>
               </div>
 
-              {((guideData[channel.epg_channel_id] || []).length === 0) ? Array.from({length:8}).map((_,idx)=>(<div key={idx} style={{background:"#111827",borderRadius:12,padding:12,minHeight:140,display:"flex",alignItems:"center",justifyContent:"center",color:"#6b7280",fontWeight:"bold"}}>No Guide Data</div>)) : (guideData[channel.epg_channel_id] || []).slice(0,4).map((item: any, idx: number) => (
+              {((guideData[channel.epg_channel_id] || []).length === 0) ? Array.from({length:8}).map((_,idx)=>(<div key={idx} style={{background:"#111827",borderRadius:12,padding:12,minHeight:140,display:"flex",alignItems:"center",justifyContent:"center",color:"#6b7280",fontWeight:"bold"}}>No Guide Data</div>)) : (guideData[channel.epg_channel_id] || []).slice(0,12).map((item: any, idx: number) => (
                   <div
                     key={idx}
                     onClick={() => { setSelectedProgram(item); }}
@@ -316,6 +322,7 @@ setGuideData(guideMap);
                 ))}
             </div>
           ))}
+          </div>
         </div>
       </div>
     </div>
