@@ -1,23 +1,26 @@
-export default function MoviePlayer() {
+export default function MoviePlayer({
+  title = "",
+  streamUrl = ""
+}: {
+  title?: string;
+  streamUrl?: string;
+}) {
   return (
     <div style={{ color: "white" }}>
-      <h1>Movie Player</h1>
+      <h1>{title}</h1>
 
-      <div
+      <video
+        controls
+        autoPlay
         style={{
-          height: "600px",
+          width: "100%",
+          maxHeight: "700px",
           background: "#000",
           borderRadius: "20px",
-          marginTop: "20px",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          fontSize: "36px",
-          fontWeight: "bold"
+          marginTop: "20px"
         }}
-      >
-        ▶ MOVIE PLAYER
-      </div>
+        src={streamUrl}
+      />
 
       <div
         style={{
@@ -27,7 +30,7 @@ export default function MoviePlayer() {
           padding: "20px"
         }}
       >
-        Now Playing: Top Gun Maverick
+        Now Playing: {title}
       </div>
     </div>
   );

@@ -1,155 +1,63 @@
 export default function MovieDetails({
   movie,
   onPlay,
-  onFavorite,
-  onSelectMovie
+  onFavorite
 }: any) {
   return (
     <div style={{ color: "white" }}>
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "300px 1fr",
-          gap: "30px",
+          gridTemplateColumns: "260px 1fr",
+          gap: 30,
           background: "#111827",
-          borderRadius: "24px",
-          padding: "30px"
+          borderRadius: 24,
+          padding: 30
         }}
       >
-        <div
+        <img
+          src={movie.stream_icon}
+          alt={movie.name}
           style={{
-            height: "450px",
-            borderRadius: "20px",
-            background:
-              "linear-gradient(135deg,#7d4dff,#2d8cff)",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            fontSize: "24px",
-            fontWeight: "bold"
+            width: "100%",
+            borderRadius: 18
           }}
-        >
-          {movie}
-        </div>
+        />
 
         <div>
-          <h1
-            style={{
-              fontSize: "clamp(32px,5vw,48px)",
-              lineHeight: "1.1",
-              marginBottom: "10px"
-            }}
-          >
-            {movie}
-          </h1>
+          <h1>{movie.name}</h1>
 
-          <div
-            style={{
-              color: "#bbb",
-              marginBottom: "20px"
-            }}
-          >
-            Action • HD • BluTV
+          <div style={{ color:"#aaa", marginBottom:20 }}>
+            {movie.year} • {movie.genre}
           </div>
 
-          <p
-            style={{
-              color: "#ddd",
-              fontSize: "18px",
-              lineHeight: "1.6",
-              maxWidth: "700px"
-            }}
-          >
-            Stream {movie} instantly on BluTV.
+          <div style={{ marginBottom:15 }}>
+            ⭐ {movie.rating}
+          </div>
+
+          <div style={{ marginBottom:15 }}>
+            <strong>Cast:</strong> {movie.cast}
+          </div>
+
+          <p style={{ lineHeight:1.7 }}>
+            {movie.plot}
           </p>
 
           <div
             style={{
-              display: "flex",
-              gap: "15px",
-              marginTop: "25px"
+              display:"flex",
+              gap:15,
+              marginTop:25
             }}
           >
-            <button
-              onClick={onPlay}
-              style={{
-                padding: "14px 30px",
-                borderRadius: "12px",
-                border: "none",
-                fontWeight: "bold",
-                cursor: "pointer"
-              }}
-            >
-              ▶ Play
+            <button onClick={onPlay}>
+              ▶ Play Movie
             </button>
 
-            <button
-              onClick={onFavorite}
-              style={{
-                padding: "14px 30px",
-                borderRadius: "12px",
-                border: "none",
-                background: "#222",
-                color: "white",
-                cursor: "pointer"
-              }}
-            >
+            <button onClick={onFavorite}>
               ⭐ Favorite
             </button>
-
-            <button
-              onClick={onPlay}
-              style={{
-                padding: "14px 30px",
-                borderRadius: "12px",
-                border: "none",
-                background: "#333",
-                color: "white",
-                cursor: "pointer"
-              }}
-            >
-              Trailer
-            </button>
           </div>
-        </div>
-      </div>
-
-      <div style={{ marginTop: "35px" }}>
-        <h2>Similar Movies</h2>
-
-        <div
-          style={{
-            display: "flex",
-            gap: "15px",
-            overflowX: "auto"
-          }}
-        >
-          {[
-            "Mission Impossible",
-            "John Wick",
-            "The Equalizer",
-            "Fast X",
-            "The Batman",
-            "Avatar"
-          ].map((item) => (
-            <div
-              key={item}
-              onClick={() => onSelectMovie(item)}
-              style={{
-                minWidth: "220px",
-                height: "320px",
-                borderRadius: "18px",
-                padding: "20px",
-                display: "flex",
-                alignItems: "end",
-                cursor: "pointer",
-                background:
-                  "linear-gradient(135deg,#111827,#7d4dff,#2d8cff)"
-              }}
-            >
-              {item}
-            </div>
-          ))}
         </div>
       </div>
     </div>

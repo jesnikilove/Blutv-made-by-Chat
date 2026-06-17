@@ -67,3 +67,27 @@ export function buildStreamUrl(
 
   return `${base}/live/${username}/${password}/${streamId}.m3u8`;
 }
+
+export function buildMovieUrl(
+  server: string,
+  username: string,
+  password: string,
+  streamId: string | number,
+  extension: string
+) {
+  return `${server}/movie/${username}/${password}/${streamId}.${extension}`;
+}
+
+export async function getVodStreams(
+  server: string,
+  username: string,
+  password: string
+) {
+  const base = normalizeServer(server);
+
+  const res = await fetch(
+    `${base}/player_api.php?username=${username}&password=${password}&action=get_vod_streams`
+  );
+
+  return await res.json();
+}

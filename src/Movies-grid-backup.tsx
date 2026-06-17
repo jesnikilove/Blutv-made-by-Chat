@@ -38,11 +38,9 @@ export default function Movies() {
     loadMovies();
   }, []);
 
-
   if (loading) {
-
-return (
-    <div style={{ color: "white" }}>
+    return (
+      <div style={{ color: "white" }}>
         Loading Movies...
       </div>
     );
