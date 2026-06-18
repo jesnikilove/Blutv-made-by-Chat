@@ -75,7 +75,9 @@ export function buildMovieUrl(
   streamId: string | number,
   extension: string
 ) {
-  return `${server}/movie/${username}/${password}/${streamId}.${extension}`;
+  const base = normalizeServer(server);
+
+  return `${base}/movie/${username}/${password}/${streamId}.${extension}`;
 }
 
 export async function getVodStreams(

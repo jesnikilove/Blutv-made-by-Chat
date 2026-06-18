@@ -130,7 +130,10 @@ export default function HomeScreen() {
   ];
 
   return (
-    page === "EPG"
+    page === "EPG" ||
+    page === "Prime Crime" ||
+    page === "Women's Favorites" ||
+    page === "Series"
       ? <div style={{background:"#05010d",color:"white",height:"100vh",overflow:"hidden"}}>{renderContent()}</div>
       : <div style={{background:"#05010d",color:"white",minHeight:"100vh",display:"flex",fontFamily:"Arial, sans-serif"}}>
       <div style={{width:260,

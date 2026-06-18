@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { getActiveProvider } from "./store/providerStore";
-import { getSeriesInfo } from "./services/xtream";
+import { getSeriesInfo, buildEpisodeUrl } from "./services/xtream";
+import EpisodePlayer from "./EpisodePlayer";
 
 export default function SeriesDetails({
   show,
@@ -9,6 +10,7 @@ export default function SeriesDetails({
   const [info, setInfo] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [selectedSeason, setSelectedSeason] = useState("");
+  const [selectedEpisode, setSelectedEpisode] = useState<any>(null);
 
   useEffect(() => {
     async function loadSeriesInfo() {
@@ -24,7 +26,6 @@ export default function SeriesDetails({
           show.series_id
         );
 
-        console.log("SERIES_INFO",data);
         setInfo(data);
 
         const firstSeason =
@@ -42,6 +43,33 @@ export default function SeriesDetails({
 
     loadSeriesInfo();
   }, [show]);
+
+  if (selectedEpisode) {
+    const provider = getActiveProvider();
+
+    const streamUrl = selectedEpisode.direct_source || buildEpisodeUrl(provider?.server || "", provider?.username || "", provider?.password || "", selectedEpisode.id, selectedEpisode.container_extension || "mp4");
+
+    return (
+      <div>
+        <button
+          onClick={() => setSelectedEpisode(null)}
+          style={{
+            marginBottom: 20,
+            padding: "12px 20px",
+            borderRadius: 12,
+            border: "none"
+          }}
+        >
+          ← Back To Episodes
+        </button>
+
+        <EpisodePlayer
+          title={selectedEpisode.title}
+          streamUrl={streamUrl}
+        />
+      </div>
+    );
+  }
 
   if (loading) {
     return (
@@ -143,9 +171,11 @@ export default function SeriesDetails({
             (ep: any) => (
               <div
                 key={ep.id}
+                onClick={() => setSelectedEpisode(ep)}
                 style={{
                   padding: 15,
-                  borderBottom: "1px solid #222"
+                  borderBottom: "1px solid #222",
+                  cursor: "pointer"
                 }}
               >
                 {ep.title}

@@ -22,7 +22,9 @@ export default function LiveTV() {
           provider.password || ""
         );
 
-        setChannels(streams.slice(0, 200));
+        console.log(streams.map((s:any) => s.name));
+
+        setChannels(streams);
       } catch (err) {
         console.error(err);
       } finally {
