@@ -13,11 +13,25 @@ export default function ChannelPlayer({
   const [paused, setPaused] = useState(false);
 
   useEffect(() => {
-    if (!preview && videoRef.current) {
-      videoRef.current.requestFullscreen?.().catch(() => {});
-    }
-  }, [preview]);
+  if (!preview && videoRef.current) {
+    const video = videoRef.current;
 
+    const enterFullscreen = () => {
+      video.requestFullscreen?.().catch(() => {});
+    };
+
+    video.addEventListener("loadedmetadata", enterFullscreen, {
+      once: true
+    });
+
+    return () => {
+      video.removeEventListener(
+        "loadedmetadata",
+        enterFullscreen
+      );
+    };
+  }
+}, [preview, streamUrl]);
   return (
     <div style={{ color: "white" }}>
       {!preview && (
