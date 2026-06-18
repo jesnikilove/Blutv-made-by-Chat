@@ -74,7 +74,6 @@ programmes.forEach((p: any) => {
   if (!startTs || startTs < now || startTs > now + 86400) return;
 
 
-  console.log(channelId, rawTitle, p.start_timestamp);
   guideMap[channelId].push({
     id: p.start_timestamp || `-`,
     start_timestamp: p.start_timestamp,
@@ -90,11 +89,19 @@ const usChannels = streamData
   .filter((c: any) => c.epg_channel_id)
   .filter((c: any) => {
     const id = String(c.epg_channel_id || "");
-    return (/\.us$/i.test(id) || /^US:/i.test(id) || /^US /i.test(id));
+    return (
+      /\.us$/i.test(id) ||
+      /^US:/i.test(id) ||
+      /^US /i.test(id)
+    );
   })
-  .filter((c: any) => (guideMap[c.epg_channel_id] || []).length > 0)
-  .filter((c: any) => !/^(ABC|CBS|NBC|FOX|CW)\s*\d+/i.test(c.name))
-  .sort((a: any, b: any) => a.name.localeCompare(b.name));
+  .filter(
+    (c: any) =>
+      (guideMap[c.epg_channel_id] || []).length > 0
+  )
+  .sort((a: any, b: any) =>
+    a.name.localeCompare(b.name)
+  );
 
 console.log("CHANNEL COUNT", usChannels.length);
 
@@ -130,7 +137,16 @@ setGuideData(guideMap);
 
   const startHour = new Date().getHours();
 
-  const timeline = ["NOW","NEXT","THEN","LATER"];
+  const timeline = Array.from({length:24}, (_,i)=>{
+    const d = new Date();
+    d.setMinutes(0,0,0);
+    d.setHours(startHour + i);
+    return d.toLocaleTimeString([], { hour:"numeric", minute:"2-digit", hour12:true });
+  });
+const guideStart = new Date();
+guideStart.setMinutes(0,0,0);
+const guideStartTs = Math.floor(guideStart.getTime()/1000);
+
 
   if (showPlayer && selectedChannel) {
     return (
@@ -178,10 +194,10 @@ setGuideData(guideMap);
       >
         <div style={{height:"100%",display:"flex",flexDirection:"column"}}>
           <div style={{display:"grid",gridTemplateColumns:"1.4fr 1fr",gap:12,marginBottom:12}}>
-            <div style={{background:"#0b1220",borderRadius:12,minHeight:260,display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,fontWeight:"bold"}}>
+            <div style={{background:"#111827",borderRadius:12,minHeight:260,display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,fontWeight:"bold"}}>
               Preview Screen
             </div>
-            <div style={{background:"#0b1220",borderRadius:12,padding:20}}>
+            <div style={{background:"#111827",borderRadius:12,padding:20}}>
               {selectedProgram ? (
                 <>
                   <h2>{selectedProgram.title}</h2>
@@ -202,24 +218,24 @@ setGuideData(guideMap);
             onScroll={(e) => setVisibleStart(Math.max(0, Math.floor(e.currentTarget.scrollTop / 160)))}
 
             style={{
-              overflowX: "hidden",
+              overflowX: "scroll",
               overflowY: "auto",
               height: "calc(100vh - 320px)",
               width: "100%",
               flex: 1
             }}
           >
-            <div style={{width:"100%"}}>
+            <div style={{width:"6040px"}}>
 
           <div
             style={{
               display: "grid",
               gridTemplateColumns:
-                "280px repeat(4,minmax(0,1fr))",
+                "280px repeat(50,minmax(240px,240px))",
               gap: 12,
               position: "sticky",
               top: 0,
-              zIndex: 99999,
+              zIndex: 100,
               background: "#0b1220",
               paddingBottom: 10
             }}
@@ -233,7 +249,7 @@ setGuideData(guideMap);
                 fontWeight: "bold",
                 textAlign: "center",
                 position: "sticky",
-                  boxShadow: "12px 0 24px rgba(0,0,0,.85)",
+                left: 0,
                 zIndex: 200
               }}
             >
@@ -256,13 +272,13 @@ setGuideData(guideMap);
             ))}
           </div>
 
-          {channels.map(channel => (
+          {channels.slice(visibleStart, visibleStart + 20).map(channel => (
             <div
               key={channel.stream_id}
               style={{
                 display: "grid",
                 gridTemplateColumns:
-                  "280px repeat(4,minmax(0,1fr))",
+                  "280px repeat(50,minmax(240px,240px))",
                 gap: 12,
                 marginTop: 8
               }}
@@ -278,13 +294,12 @@ setGuideData(guideMap);
                   cursor: "pointer",
                   position: "sticky",
                   left: 0,
-                  zIndex: 5000,
-                  boxShadow: "12px 0 24px rgba(0,0,0,.85)",
+                  zIndex: 100,
                   background:
                     selectedChannel?.stream_id ===
                     channel.stream_id
                       ? "linear-gradient(135deg,#7d4dff,#2d8cff)"
-                      : "#0b1220"
+                      : "#111827"
                 }}
               >
                 <img
@@ -298,35 +313,38 @@ setGuideData(guideMap);
                     borderRadius: 8
                   }}
                 />
+
                 <div
                   style={{
                     fontSize:16,
-                    fontWeight:"bold"
+                    fontWeight: "bold"
                   }}
                 >
                   {channel.name}
                 </div>
               </div>
 
-              {((guideData[channel.epg_channel_id] || []).length === 0) ? Array.from({length:8}).map((_,idx)=>(<div key={idx} style={{background:"#0b1220",borderRadius:12,padding:12,minHeight:60,display:"flex",alignItems:"center",justifyContent:"center",color:"#6b7280",fontWeight:"bold"}}>No Guide Data</div>)) : (guideData[channel.epg_channel_id] || []).slice(0,4).map((item: any, idx: number) => (
+              {((guideData[channel.epg_channel_id] || []).length === 0) ? Array.from({length:8}).map((_,idx)=>(<div key={idx} style={{background:"#111827",borderRadius:12,padding:12,minHeight:140,display:"flex",alignItems:"center",justifyContent:"center",color:"#6b7280",fontWeight:"bold"}}>No Guide Data</div>)) : (guideData[channel.epg_channel_id] || []).slice(0,48).map((item: any, idx: number) => (
                   <div
                     key={idx}
                     onClick={() => { setSelectedProgram(item); }}
                     style={{
-                      background: "#0b1220",
+                      background: "#111827",
                       borderRadius: 12,
                       padding: 12,
-                      minHeight:60
+                      minHeight:140
                     }}
                   >
                     <div
                       style={{
                         fontWeight: "bold",
-                        fontSize: 16,
+                        fontSize:16,
                         lineHeight: 1.4
                       }}
                     >
                       {item.title}
+                    <div style={{color:"#60a5fa",fontSize:13,marginTop:8}}>{new Date(Number(item.start_timestamp) * 1000).toLocaleTimeString([], { hour: "numeric", minute: "2-digit", hour12: true })} - {new Date(Number(item.stop_timestamp) * 1000).toLocaleTimeString([], { hour: "numeric", minute: "2-digit", hour12: true })}</div>
+                    <div style={{color:"#d1d5db",fontSize:13,marginTop:8,lineHeight:1.4}}>{item.description || "No description available"}</div>
                     </div>
                   </div>
                 ))}
