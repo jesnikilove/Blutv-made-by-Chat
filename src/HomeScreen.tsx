@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import LiveTV from "./LiveTV";
 import EPG from "./EPG";
 import Favorites from "./Favorites";
@@ -10,16 +10,27 @@ import CategoryView from "./CategoryView";
 export default function HomeScreen() {
   const [page, setPage] = useState("Home");
 
+  useEffect(() => {
+    const onPopState = () => {
+      setPage("Home");
+    };
+
+    window.addEventListener("popstate", onPopState);
+
+    return () =>
+      window.removeEventListener("popstate", onPopState);
+  }, []);
+
   const renderContent = () => {
     switch (page) {
       case "Live TV":
         return <LiveTV />;
 
       case "EPG":
-        return <EPG />;
+        return <EPG onHome={() => setPage("Home")} />;
 
       case "EPG":
-        return <EPG />;
+        return <EPG onHome={() => setPage("Home")} />;
 
       case "Favorites":
         return <Favorites />;
@@ -74,7 +85,15 @@ export default function HomeScreen() {
               ].map((item) => (
                 <div
                   key={item}
-                  onClick={() => setPage(item)}
+                  onClick={() => {
+              if (item === "EPG") {
+                window.history.pushState(
+                  { page:"EPG" },
+                  ""
+                );
+              }
+              setPage(item);
+            }}
                   style={{
                     height: 180,
                     borderRadius: 18,

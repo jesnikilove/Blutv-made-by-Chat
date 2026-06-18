@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { getActiveProvider } from "./store/providerStore";
 import {
@@ -8,35 +7,18 @@ import {
 } from "./services/xtream";
 import ChannelPlayer from "./ChannelPlayer";
 import ProgramDetails from "./ProgramDetails";
-import { getChannelTimezone } from "./utils/timezones";
 
-export default function EPG({
-  onHome
-}: {
-  onHome?: () => void;
-}) {
+export default function EPG() {
   const [channels, setChannels] = useState<any[]>([]);
   const [guideData, setGuideData] = useState<Record<string, any[]>>({});
   const [selectedChannel, setSelectedChannel] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [showPlayer, setShowPlayer] = useState(false);
+  const [showPlayer] = useState(false);
   const [showDetails] = useState(false);
   const [selectedProgram,setSelectedProgram] = useState<any>(null);
+const [localTimeOnly, setLocalTimeOnly] = useState(true);
   const [visibleStart, setVisibleStart] = useState(0);
-  const [selectedTimezone, setSelectedTimezone] = useState("ALL");
-  useEffect(() => {
-    const onPopState = () => {
-      setShowPlayer(false);
-    };
 
-    window.addEventListener("popstate", onPopState);
-
-    return () =>
-      window.removeEventListener("popstate", onPopState);
-  }, []);
-
-
-  console.log("VISIBLE START", visibleStart);
 
 
   useEffect(() => {
@@ -87,6 +69,12 @@ programmes.forEach((p: any) => {
     guideMap[channelId] = [];
   }
 
+  const now = Math.floor(Date.now() / 1000);
+  const startTs = Number(p.start_timestamp || 0);
+  const stopTs = Number(p.stop_timestamp || 0);
+  if (!startTs || !stopTs || stopTs < now || startTs > now + 86400) return;
+
+
   console.log(channelId, rawTitle, p.start_timestamp);
   guideMap[channelId].push({
     id: p.start_timestamp || `-`,
@@ -107,13 +95,14 @@ const usChannels = streamData
   })
   .filter((c: any) => (guideMap[c.epg_channel_id] || []).length > 0)
   .filter((c: any) => !/^(ABC|CBS|NBC|FOX|CW)\s*\d+/i.test(c.name))
+  .filter((c: any) => {
+    if (!localTimeOnly) return true;
+    const name = (c.name || "").toLowerCase();
+    return !(name.includes(" west") || name.includes(" pacific") || name.includes(" mountain"));
+  })
   .sort((a: any, b: any) => a.name.localeCompare(b.name));
 
 console.log("CHANNEL COUNT", usChannels.length);
-console.log(
-  "SAMPLE CHANNEL",
-  JSON.stringify(usChannels[0], null, 2)
-);
 
 setChannels(usChannels);
 
@@ -131,25 +120,12 @@ setGuideData(guideMap);
     load();
   }, []);
 
-const getVisiblePrograms = (channel: any) => {
-  const programs = guideData[channel.epg_channel_id] || [];
-  const now = Math.floor(Date.now() / 1000);
-  const currentIndex = programs.findIndex((p:any) => Number(p.start_timestamp) <= now && Number(p.stop_timestamp) > now);
-  return currentIndex >= 0 ? programs.slice(currentIndex,currentIndex+4) : programs.slice(0,4);
-};
-
   const currentPrograms =
     selectedChannel
       ? guideData[selectedChannel.epg_channel_id] || []
       : [];
 
-  const now = Math.floor(Date.now() / 1000);
-
-  const currentProgram =
-    currentPrograms.find((p: any) =>
-      Number(p.start_timestamp) <= now &&
-      Number(p.stop_timestamp) > now
-    ) || currentPrograms[0];
+  const currentProgram = currentPrograms[0];
 
 
   const currentTitle =
@@ -165,17 +141,16 @@ const getVisiblePrograms = (channel: any) => {
   if (showPlayer && selectedChannel) {
     return (
       <ChannelPlayer
-        preview={false}
-        onBack={() => setShowPlayer(false)}
         channel={selectedChannel.name}
         title={currentTitle}
         description={currentDescription}
         streamUrl={buildStreamUrl(
-                  getActiveProvider()?.server || "",
-                  getActiveProvider()?.username || "",
-                  getActiveProvider()?.password || "",
-                  selectedChannel?.stream_id
-                )}/>
+          getActiveProvider()?.server || "",
+          getActiveProvider()?.username || "",
+          getActiveProvider()?.password || "",
+          selectedChannel.stream_id
+        )}
+      />
     );
   }
 
@@ -208,25 +183,26 @@ const getVisiblePrograms = (channel: any) => {
         }}
       >
         <div style={{height:"100%",display:"flex",flexDirection:"column"}}>
+          <div style={{padding:"8px 0"}}>
+            <label style={{display:"flex",alignItems:"center",gap:8,cursor:"pointer"}}>
+              <input
+                type="checkbox"
+                checked={localTimeOnly}
+                onChange={(e)=>setLocalTimeOnly(e.target.checked)}
+              />
+              Local Time Channels Only
+            </label>
+          </div>
           <div style={{display:"grid",gridTemplateColumns:"1.4fr 1fr",gap:12,marginBottom:12}}>
             <div
-              onClick={() => {
-                window.history.pushState(
-                  { player:true },
-                  ""
-                );
-                setShowPlayer(true);
-              }}
               style={{
                 background:"#0b1220",
                 borderRadius:12,
                 minHeight:260,
-                overflow:"hidden",
-                cursor:"pointer"
+                overflow:"hidden"
               }}
             >
               <ChannelPlayer
-                preview={true}
                 channel={selectedChannel?.name || ""}
                 streamUrl={buildStreamUrl(
                   getActiveProvider()?.server || "",
@@ -238,16 +214,7 @@ const getVisiblePrograms = (channel: any) => {
                 description={selectedProgram?.description || ""}
               />
             </div>
-            <div
-              style={{
-                background:"#0b1220",
-                borderRadius:12,
-                padding:20,
-                display:"flex",
-                flexDirection:"column",
-                minHeight:260
-              }}
-            >
+            <div style={{background:"#0b1220",borderRadius:12,padding:20}}>
               {selectedProgram ? (
                 <>
                   <h2>{selectedProgram.title}</h2>
@@ -258,40 +225,9 @@ const getVisiblePrograms = (channel: any) => {
                   </div>
                   <div>{selectedProgram.description || "No description available"}</div>
                 </>
-
               ) : (
-                <>
-                  <div>Select a program</div>
-                </>
+                <div>Select a program</div>
               )}
-
-              <div
-                style={{
-                  marginTop:"auto",
-                  paddingTop:20,
-                  display:"flex",
-                  justifyContent:"space-between",
-                  alignItems:"center",
-                  borderTop:"1px solid #1f2937"
-                }}
-              >
-                <button
-                  onClick={onHome}
-                  style={{
-                    padding:"10px 18px",
-                    border:"none",
-                    borderRadius:8,
-                    background:"#2563eb",
-                    color:"#fff",
-                    cursor:"pointer",
-                    fontWeight:"bold"
-                  }}
-                >
-                  ← Back
-                </button>
-
-                <label style={{display:"flex",alignItems:"center",gap:8}}><span style={{fontWeight:"bold"}}>Timezone:</span><select value={selectedTimezone} onChange={(e)=>setSelectedTimezone(e.target.value)} style={{padding:"6px 10px",borderRadius:6}}><option value="ALL">All Channels</option><option value="ET">Eastern Time</option><option value="CT">Central Time</option><option value="MT">Mountain Time</option><option value="PT">Pacific Time</option></select></label>
-              </div>
             </div>
           </div>
 
@@ -353,7 +289,11 @@ const getVisiblePrograms = (channel: any) => {
             ))}
           </div>
 
-          {(selectedTimezone === "ALL" ? channels : channels.filter(channel => getChannelTimezone(channel.name) === selectedTimezone)).map(channel => (
+          {channels.filter((channel:any)=>{
+  if(!localTimeOnly) return true;
+  const n=(channel.name||"").toLowerCase();
+  return !(n.includes(" west") || n.includes(" pacific") || n.includes(" mountain"));
+}).map(channel => (
             <div
               key={channel.stream_id}
               style={{
@@ -365,16 +305,7 @@ const getVisiblePrograms = (channel: any) => {
               }}
             >
               <div
-                onClick={() => {
-                  setSelectedChannel(channel);
-
-                  const programs =
-                    getVisiblePrograms(channel);
-
-                  if (programs.length) {
-                    setSelectedProgram(programs[0]);
-                  }
-                }}
+                onClick={() => setSelectedChannel(channel)}
                 style={{
                   display: "flex",
                   alignItems: "center",
@@ -414,25 +345,16 @@ const getVisiblePrograms = (channel: any) => {
                 </div>
               </div>
 
-              {((guideData[channel.epg_channel_id] || []).length === 0) ? Array.from({length:8}).map((_,idx)=>(<div key={idx} style={{background:"#0b1220",borderRadius:12,padding:12,minHeight:60,display:"flex",alignItems:"center",justifyContent:"center",color:"#6b7280",fontWeight:"bold"}}>No Guide Data</div>)) : getVisiblePrograms(channel).map((item: any, idx: number) => (
+
+              {((guideData[channel.epg_channel_id] || []).length === 0) ? Array.from({length:8}).map((_,idx)=>(<div key={idx} style={{background:"#0b1220",borderRadius:12,padding:12,minHeight:60,display:"flex",alignItems:"center",justifyContent:"center",color:"#6b7280",fontWeight:"bold"}}>No Guide Data</div>)) : (guideData[channel.epg_channel_id] || []).sort((a:any,b:any)=>Number(a.start_timestamp)-Number(b.start_timestamp)).filter((item:any)=>Number(item.stop_timestamp)*1000>Date.now()).slice(0,4).map((item: any, idx: number) => (
                   <div
                     key={idx}
-                    onClick={() => {
-                      setSelectedChannel(channel);
-                      setSelectedProgram(item);
-                    }}
+                    onClick={() => { setSelectedProgram(item); }}
                     style={{
                       background: "#0b1220",
                       borderRadius: 12,
                       padding: 12,
-                      minHeight:60,
-                      border: selectedProgram === item
-                        ? "2px solid #3b82f6"
-                        : "1px solid transparent",
-                      boxShadow: selectedProgram === item
-                        ? "0 0 15px rgba(59,130,246,.65)"
-                        : "none",
-                      cursor:"pointer"
+                      minHeight:60
                     }}
                   >
                     <div

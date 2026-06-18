@@ -1,0 +1,71 @@
+const EASTERN = [
+  "NEW YORK","PHILADELPHIA","BOSTON","CHARLOTTE",
+  "ATLANTA","MIAMI","WASHINGTON","RICHMOND",
+  "ORLANDO","TAMPA","JACKSONVILLE","CLEVELAND",
+  "DETROIT","BUFFALO","PITTSBURGH","RALEIGH",
+  "COLUMBUS","CINCINNATI","NORFOLK"
+];
+
+const CENTRAL = [
+  "CHICAGO","DALLAS","HOUSTON","AUSTIN","SAN ANTONIO",
+  "NASHVILLE","MEMPHIS","MINNEAPOLIS","ST LOUIS",
+  "KANSAS CITY","OMAHA","TULSA","OKLAHOMA CITY",
+  "FARGO","BATON ROUGE","NEW ORLEANS","MILWAUKEE"
+];
+
+const MOUNTAIN = [
+  "DENVER","ALBUQUERQUE","COLORADO SPRINGS",
+  "BOISE","MISSOULA","BILLINGS","CHEYENNE"
+];
+
+const PACIFIC = [
+  "LOS ANGELES","SAN DIEGO","SAN FRANCISCO",
+  "SACRAMENTO","SEATTLE","PORTLAND","SPOKANE",
+  "SALINAS","EL CENTRO"
+];
+
+const EAST_FEEDS = [
+  "A&E","AMC","BBC AMERICA","BET","BRAVO","CMT",
+  "COMEDY CENTRAL","COZI","E!","FREEFORM","FX",
+  "FXX","GSN","GRIT","HALLMARK","IFC","ION",
+  "LIFETIME","METV","MOTORTREND","MTV","MTV2",
+  "PARAMOUNT","POP","REELZ","SUNDANCE","SYFY",
+  "TBS","TLC","TNT","TRAVEL","TV LAND","TV ONE",
+  "UPTV","USA","VH1","WE TV","ANIMAL PLANET",
+  "COOKING CHANNEL","DISCOVERY","FOOD NETWORK",
+  "HGTV","HISTORY","MAGNOLIA","NATIONAL GEOGRAPHIC",
+  "NAT GEO","OWN","SCIENCE","SMITHSONIAN",
+  "VICE","ID","OXYGEN","BOOMERANG",
+  "CARTOON NETWORK","DISNEY","NICKELODEON",
+  "NICK JR","NICKTOONS","TEENNICK",
+  "HBO","CINEMAX","SHOWTIME","STARZ",
+  "ENCORE","MGM","TMC","TCM"
+];
+
+export function getChannelTimezone(name: string) {
+  const upper = String(name || "").toUpperCase();
+
+  // Explicit feed names
+  if (upper.includes(" EAST")) return "ET";
+  if (upper.includes(" WEST")) return "PT";
+  if (upper.includes(" PACIFIC")) return "PT";
+  if (upper.includes(" MOUNTAIN")) return "MT";
+  if (upper.includes(" CENTRAL")) return "CT";
+
+  // Eastern cities
+  if (EASTERN.some(x => upper.includes(x))) return "ET";
+
+  // Central cities
+  if (CENTRAL.some(x => upper.includes(x))) return "CT";
+
+  // Mountain cities
+  if (MOUNTAIN.some(x => upper.includes(x))) return "MT";
+
+  // Pacific cities
+  if (PACIFIC.some(x => upper.includes(x))) return "PT";
+
+  // National cable defaults
+  if (EAST_FEEDS.some(x => upper.includes(x)) && !upper.includes(" WEST") && !upper.includes(" PACIFIC") && !upper.includes(" MOUNTAIN") && !upper.includes(" CENTRAL")) return "ET";
+
+  return "UNKNOWN";
+}

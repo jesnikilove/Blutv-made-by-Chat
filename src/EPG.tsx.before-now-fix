@@ -87,6 +87,11 @@ programmes.forEach((p: any) => {
     guideMap[channelId] = [];
   }
 
+  const now = Math.floor(Date.now() / 1000);
+  const startTs = Number(p.start_timestamp || 0);
+  if (!startTs || startTs < now || startTs > now + 86400) return;
+
+
   console.log(channelId, rawTitle, p.start_timestamp);
   guideMap[channelId].push({
     id: p.start_timestamp || `-`,
@@ -130,13 +135,6 @@ setGuideData(guideMap);
 
     load();
   }, []);
-
-const getVisiblePrograms = (channel: any) => {
-  const programs = guideData[channel.epg_channel_id] || [];
-  const now = Math.floor(Date.now() / 1000);
-  const currentIndex = programs.findIndex((p:any) => Number(p.start_timestamp) <= now && Number(p.stop_timestamp) > now);
-  return currentIndex >= 0 ? programs.slice(currentIndex,currentIndex+4) : programs.slice(0,4);
-};
 
   const currentPrograms =
     selectedChannel
@@ -369,7 +367,7 @@ const getVisiblePrograms = (channel: any) => {
                   setSelectedChannel(channel);
 
                   const programs =
-                    getVisiblePrograms(channel);
+                    (guideData[channel.epg_channel_id] || []).slice(0,4);
 
                   if (programs.length) {
                     setSelectedProgram(programs[0]);
@@ -414,7 +412,7 @@ const getVisiblePrograms = (channel: any) => {
                 </div>
               </div>
 
-              {((guideData[channel.epg_channel_id] || []).length === 0) ? Array.from({length:8}).map((_,idx)=>(<div key={idx} style={{background:"#0b1220",borderRadius:12,padding:12,minHeight:60,display:"flex",alignItems:"center",justifyContent:"center",color:"#6b7280",fontWeight:"bold"}}>No Guide Data</div>)) : getVisiblePrograms(channel).map((item: any, idx: number) => (
+              {((guideData[channel.epg_channel_id] || []).length === 0) ? Array.from({length:8}).map((_,idx)=>(<div key={idx} style={{background:"#0b1220",borderRadius:12,padding:12,minHeight:60,display:"flex",alignItems:"center",justifyContent:"center",color:"#6b7280",fontWeight:"bold"}}>No Guide Data</div>)) : (guideData[channel.epg_channel_id] || []).slice(0,4).map((item: any, idx: number) => (
                   <div
                     key={idx}
                     onClick={() => {
